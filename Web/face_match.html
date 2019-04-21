@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>人脸比对</title>
+		<script src="js/jquery-2.1.0.js" type="text/javascript" charset="utf-8"></script>
+			<script src="js/jquery-2.1.0.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/jquery.particleground.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/ai.js" type="text/javascript" charset="utf-8"></script>
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<style type="text/css">
+			#dianji:hover{
+				transition: 0.5s;
+				background: skyblue;
+			}
+			.sss{
+				display: inline-block;
+				line-height:100px ;
+				border-radius: 100%; 
+				width: 200px;
+				margin: auto; 
+				height: 200px; 
+				border: 1px solid white;
+				margin-top: 10%;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="context">
+			<div class="intro">
+				<div style="overflow: hidden; position: relative;top: 40%; overflow: hidden;margin: auto;text-align: center;">
+					<div style="border: 1px solid white; width: 30%; height: 400px; float: left;"><img id="ig1" src="" alt="" style="width: 100%; height: 100%"/></div>
+					<div class="sss">相似度</div>
+					<div style="border: 1px solid white; width: 30%; height: 400px; float: right;"><img id="ig2" src="" alt="" style="width: 100%; height: 100%;"/></div>
+				</div>
+
+				<form id="tttt" method="post" style="width: 80%;  margin:40px auto;">
+					<div style="width: 40%;float: left; position: relative;">
+						<span style="position: absolute;left: 0px;background: skyblue;display: inline-block;height: 40px;line-height: 40px;width: 160px;">
+						点击上传
+						</span>
+						<input style="opacity: 0; position: absolute;left: 0px; height: 40px;" id="uploading" type="file" onchange="upload1()" name="image1">
+					</div>
+					<div style="float: right;bwidth: 40%;float: right;position: relative;">
+					  <span id="" style="position: absolute;right: 0px;background: skyblue;display: inline-block;height: 40px;line-height: 40px;width: 160px;">
+					 	点击上传
+					 </span>
+					 <input  id="up" type="file" onchange="upload2()" name="image2" style="opacity: 0; position: absolute;right: 0px; height: 40px;" >
+					 </div>
+				</form>
+				<div id="dianji" style="border: 1px solid white;width: 140px;height: 40px;line-height: 40px;border-radius: 15px; margin: auto;">开始比对</div>
+			</div>
+
+		</div>
+	</body>
+	<script type="text/javascript">
+		function upload1() {
+			var file = document.getElementById("uploading").files[0];
+			var fr = new FileReader;
+			var filePath = document.querySelector("#uploading").value;
+			fileFormat = filePath.substring(filePath.lastIndexOf(".")).toLowerCase();
+			if(!fileFormat.match(/.png|.jpg|.jpeg/)) {
+				alert('上传错误,文件格式必须为：png/jpg/jpeg');
+				return;
+			} else {
+				fr.readAsDataURL(file);
+				fr.onload = function(e){
+					document.getElementById("ig1").src = this.result;
+				}
+			}
+		}
+		function upload2() {
+			var file = document.getElementById("up").files[0];
+			var fr = new FileReader;
+			var filePath = document.querySelector("#up").value;
+			fileFormat = filePath.substring(filePath.lastIndexOf(".")).toLowerCase();
+			if(!fileFormat.match(/.png|.jpg|.jpeg/)) {
+				alert('上传错误,文件格式必须为：png/jpg/jpeg');
+				return;
+			} else {
+				fr.readAsDataURL(file);
+				fr.onload = function(e){
+					document.getElementById("ig2").src = this.result;
+				}
+			}
+		}
+		$(function() {
+			$("#dianji").click(function() {
+				$.ajax({
+					url: basePath+"/FaceMatch",
+					type: 'post',
+					cache: false,
+					data: new FormData($('#tttt')[0]),
+					processData: false,
+					contentType: false,
+					dataType: "json",
+					beforeSend: function() {
+						uploading = true;
+						
+					},
+					success: function(data) {
+						if(data.status==200){
+							document.querySelector(".sss").innerHTML="相似度<br>"+data.data.score;
+						}else{
+							$(".sss").html("相似度<br><span style='color:red'>"+data.msg+"</span>");
+						}
+						
+					},
+					error(xhr,status,error){
+						$(".sss").html("相似度<br><span style='color:red'>后台服务异常</span>");
+						return;
+					}
+				});
+			});
+		});
+	</script>
+
+</html>
